@@ -31,7 +31,13 @@ jobs:
       run: docker rm -f redux-app
     - name: run docker container
       run: docker run -d -p 3000:3000 --name redux-app jomoporo/redux-app:latest
-    
+     # Add the docker ps -a step here to check container status
+    - name: List all Docker containers
+      run: docker ps -a
+
+    # You can also check the logs if needed
+    - name: Check Docker logs
+      run: docker logs redux-app
     # - name: Checkout repository
     #   uses: actions/checkout@v4
 
