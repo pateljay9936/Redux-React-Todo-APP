@@ -12,11 +12,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    - name: Deploy application
-      uses: docker build -t jomoporo/redux-app:latest . 
+    - name: Build Docker image
+      run: docker build -t jomoporo/redux-app:latest .
     - name: login to docker hub
       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p "${{ secrets.DOCKER_PASSWORD }}"
-    - nmae: push to docker hub
+    - name: push to docker hub
       run: docker push jomoporo/redux-app:latest
 
 
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - nmae: pull image from docker hub
+    - name: pull image from docker hub
       run: docker pull jomoporo/redux-app:latest
     - name: delete existing container
       run: docker rm -f redux-app
