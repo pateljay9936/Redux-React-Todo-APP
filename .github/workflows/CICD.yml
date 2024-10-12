@@ -6,57 +6,68 @@ on:
       - new-branch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build-and-deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+        - name: login to docker hub
+          run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        - name: pull image from docker hub
+          run: docker pull jomoporo/redux-app:latest
+        - name: delete existing container
+          run: docker rm -f redux-app
+        - name: run docker container
+          run: docker run -d -p 3000:3000 jomoporo/redux-app:latest
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Build Docker image
-      run: docker build -t jomoporo/redux-app:latest .
-    - name: login to docker hub
-      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-    - name: push to docker hub
-      run: docker push jomoporo/redux-app:latest
 
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
+  # build:
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: pull image from docker hub
-      run: docker pull jomoporo/redux-app:latest
-    - name: delete existing container
-      run: docker rm -f redux-app
-    - name: run docker container
-      run: docker run -d -p 3000:3000 --name redux-app jomoporo/redux-app:latest
-      # Add a sleep command to wait for the container to initialize
-      # Add a loop that waits for the service to be ready
-    - name: Wait for service to be available
-      run: |
-        for i in {1..15}; do
-          if curl -s http://ec2-18-206-99-150.compute-1.amazonaws.com:3000 > /dev/null; then
-            echo "Service is up!"
-            break
-          fi
-          echo "Waiting for service... ($i)"
-          sleep 1
-        done
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
+  #   - name: Build Docker image
+  #     run: docker build -t jomoporo/redux-app:latest .
+  #   - name: login to docker hub
+  #     run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+  #   - name: push to docker hub
+  #     run: docker push jomoporo/redux-app:latest
 
-    # Check the container status
-    - name: List all Docker containers
-      run: docker ps -a
 
-    # Fetch logs after confirming the service is up
-    - name: Fetch Docker logs (last 15 seconds)
-      run: docker logs --since 15s redux-app
-    # - name: Checkout repository
-    #   uses: actions/checkout@v4
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
 
-    # - name: Deploy application
+  #   steps:
+  #   - name: pull image from docker hub
+  #     run: docker pull jomoporo/redux-app:latest
+  #   - name: delete existing container
+  #     run: docker rm -f redux-app
+  #   - name: run docker container
+  #     run: docker run -d -p 3000:3000 --name redux-app jomoporo/redux-app:latest
+      
+      
+
+      
+    #   # Add a loop that waits for the service to be ready
+    # - name: Wait for service to be available
     #   run: |
-    #     docker stop redux-app || true
-    #     docker rm redux-app || true
-    #     docker pull jomoporo/redux-app:latest
-    #     docker run -d -p 3000:3000 --name redux-app jomoporo/redux-app:latest
+    #     for i in {1..15}; do
+    #       if curl -s http://ec2-18-206-99-150.compute-1.amazonaws.com:3000 > /dev/null; then
+    #         echo "Service is up!"
+    #         break
+    #       fi
+    #       echo "Waiting for service... ($i)"
+    #       sleep 1
+    #     done
+
+    # # Check the container status
+    # - name: List all Docker containers
+    #   run: docker ps -a
+
+    # # Fetch logs after confirming the service is up
+    # - name: Fetch Docker logs (last 15 seconds)
+    #   run: docker logs --since 15s redux-app
+  
