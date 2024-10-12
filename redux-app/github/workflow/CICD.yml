@@ -1,0 +1,43 @@
+name: deploy NExt.js application
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Deploy application
+      uses: docker build -t jomoporo/redux-app:latest . 
+    - name: login to docker hub
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p "${{ secrets.DOCKER_PASSWORD }}"
+    - nmae: push to docker hub
+      run: docker push jomoporo/redux-app:latest
+
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - nmae: pull image from docker hub
+      run: docker pull jomoporo/redux-app:latest
+    - name: delete existing container
+      run: docker rm -f redux-app
+    - name: run docker container
+      run: docker run -d -p 3000:3000 --name redux-app jomoporo/redux-app:latest
+    
+    # - name: Checkout repository
+    #   uses: actions/checkout@v4
+
+    # - name: Deploy application
+    #   run: |
+    #     docker stop redux-app || true
+    #     docker rm redux-app || true
+    #     docker pull jomoporo/redux-app:latest
+    #     docker run -d -p 3000:3000 --name redux-app jomoporo/redux-app:latest
